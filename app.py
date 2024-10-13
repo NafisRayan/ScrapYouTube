@@ -1,31 +1,33 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from pytube import Search
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        search_query = request.form['search_query']
-        search = Search(search_query)
-        search_results = search.results
-        
-        videos = []
-        for video in search_results:
-            video_info = {
-                'title': getattr(video, 'title', 'Not available'),
-                'url': getattr(video, 'watch_url', 'Not available'),
-                'author': getattr(video, 'author', 'Not available'),
-                'duration': get_duration(video),
-                'views': get_views(video),
-                'rating': getattr(video, 'rating', 'Not available'),
-                'thumbnail_url': getattr(video, 'thumbnail_url', 'Not available'),
-                'description': getattr(video, 'description', 'Not available')
-            }
-            videos.append(video_info)
-        
-        return render_template('index.html', videos=videos, search_query=search_query)
     return render_template('index.html')
+
+@app.route('/search', methods=['POST'])
+def search():
+    search_query = request.form['search_query']
+    search = Search(search_query)
+    search_results = search.results
+    
+    videos = []
+    for video in search_results:
+        video_info = {
+            'title': getattr(video, 'title', 'Not available'),
+            'url': getattr(video, 'watch_url', 'Not available'),
+            'author': getattr(video, 'author', 'Not available'),
+            'duration': get_duration(video),
+            'views': get_views(video),
+            'rating': getattr(video, 'rating', 'Not available'),
+            'thumbnail_url': getattr(video, 'thumbnail_url', 'Not available'),
+            'description': getattr(video, 'description', 'Not available')
+        }
+        videos.append(video_info)
+    
+    return jsonify(videos)
 
 def get_duration(video):
     try:
